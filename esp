@@ -1,0 +1,151 @@
+local CoreGui = game:GetService("CoreGui")
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+
+local Plr = Players.LocalPlayer
+local highlightEnabled = false
+local menuVisible = false
+
+local ESPMenu = Instance.new("ScreenGui")
+local BG = Instance.new("Frame")
+local Title = Instance.new("TextLabel")
+local ToggleESP = Instance.new("TextButton")
+local StatusESP = Instance.new("TextLabel")
+local Credit = Instance.new("TextLabel")
+
+ESPMenu.Name = "ESPMenu"
+ESPMenu.Parent = CoreGui
+
+BG.Name = "BG"
+BG.Parent = ESPMenu
+BG.BackgroundColor3 = Color3.new(0.1, 0.1, 0.1)
+BG.BorderColor3 = Color3.new(0.05, 0.05, 0.05)
+BG.BorderSizePixel = 2
+BG.Position = UDim2.new(0.15, 0, 0.82, 0)
+BG.Size = UDim2.new(0, 210, 0, 127)
+BG.Active = true
+BG.Draggable = true
+
+Title.Name = "Title"
+Title.Parent = BG
+Title.BackgroundColor3 = Color3.new(0.27, 0.0, 0.63)
+Title.BorderColor3 = Color3.new(0.18, 0.0, 0.43)
+Title.BorderSizePixel = 2
+Title.Size = UDim2.new(0, 210, 0, 33)
+Title.Font = Enum.Font.Highway
+Title.Text = "ESP"
+Title.TextColor3 = Color3.new(1, 1, 1)
+Title.TextSize = 30
+Title.TextStrokeColor3 = Color3.new(0.18, 0.0, 0.43)
+Title.TextStrokeTransparency = 0
+
+ToggleESP.Name = "ToggleESP"
+ToggleESP.Parent = BG
+ToggleESP.BackgroundColor3 = Color3.new(0.27, 0.0, 0.63)
+ToggleESP.BorderColor3 = Color3.new(0.18, 0.0, 0.43)
+ToggleESP.BorderSizePixel = 2
+ToggleESP.Position = UDim2.new(0.15, 0, 0.37, 0)
+ToggleESP.Size = UDim2.new(0, 146, 0, 36)
+ToggleESP.Font = Enum.Font.Highway
+ToggleESP.Text = "Toggle"
+ToggleESP.TextColor3 = Color3.new(1, 1, 1)
+ToggleESP.TextSize = 20
+ToggleESP.TextStrokeColor3 = Color3.new(0.18, 0.0, 0.43)
+ToggleESP.TextStrokeTransparency = 0
+
+StatusESP.Name = "StatusESP"
+StatusESP.Parent = BG
+StatusESP.BackgroundColor3 = Color3.new(1, 1, 1)
+StatusESP.BackgroundTransparency = 1
+StatusESP.Position = UDim2.new(0.31, 0, 0.71, 0)
+StatusESP.Size = UDim2.new(0, 56, 0, 20)
+StatusESP.Font = Enum.Font.Highway
+StatusESP.Text = "ESP: off"
+StatusESP.TextColor3 = Color3.new(1, 0, 0)
+StatusESP.TextSize = 14
+StatusESP.TextXAlignment = Enum.TextXAlignment.Left
+
+Credit.Name = "Credit"
+Credit.Parent = BG
+Credit.BackgroundColor3 = Color3.new(1, 1, 1)
+Credit.BackgroundTransparency = 1
+Credit.Position = UDim2.new(0.19, 0, 0.87, 0)
+Credit.Size = UDim2.new(0, 128, 0, 17)
+Credit.Font = Enum.Font.SourceSans
+Credit.Text = "Created by siglver"
+Credit.TextColor3 = Color3.new(1, 1, 1)
+Credit.TextSize = 16
+Credit.TextStrokeColor3 = Color3.new(0.2, 0.2, 0.2)
+
+local highlightTemplate = Instance.new("Highlight")
+highlightTemplate.Name = "Highlight"
+
+local function applyHighlightToCharacter(character)
+    if character and character:FindFirstChild("HumanoidRootPart") then
+        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+        if not humanoidRootPart:FindFirstChild("Highlight") then
+            local highlightClone = highlightTemplate:Clone()
+            highlightClone.Adornee = character
+            highlightClone.Parent = humanoidRootPart
+            highlightClone.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+            highlightClone.Name = "Highlight"
+        end
+    end
+end
+
+local function removeHighlightFromCharacter(character)
+    if character and character:FindFirstChild("HumanoidRootPart") then
+        local highlight = character.HumanoidRootPart:FindFirstChild("Highlight")
+        if highlight then
+            highlight:Destroy()
+        end
+    end
+end
+
+local function toggleHighlight()
+    highlightEnabled = not highlightEnabled
+    for _, player in pairs(Players:GetPlayers()) do
+        repeat wait() until player.Character
+        if highlightEnabled then
+            applyHighlightToCharacter(player.Character)
+        else
+            removeHighlightFromCharacter(player.Character)
+        end
+    end
+end
+
+ToggleESP.MouseButton1Click:Connect(function()
+    toggleHighlight()
+    if highlightEnabled then
+        StatusESP.Text = "ESP: on"
+        StatusESP.TextColor3 = Color3.new(0, 1, 0)
+    else
+        StatusESP.Text = "ESP: off"
+        StatusESP.TextColor3 = Color3.new(1, 0, 0)
+    end
+end)
+
+Players.PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(function(character)
+        if highlightEnabled then
+            applyHighlightToCharacter(character)
+        end
+    end)
+end)
+
+Players.PlayerRemoving:Connect(function(player)
+    local character = player.Character
+    if character then
+        removeHighlightFromCharacter(character)
+    end
+end)
+
+UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+    if gameProcessedEvent then return end
+    if input.UserInputType == Enum.UserInputType.Keyboard then
+        if input.KeyCode == Enum.KeyCode.KeypadTwo then
+            menuVisible = not menuVisible
+            ESPMenu.Enabled = menuVisible
+        end
+    end
+end)
