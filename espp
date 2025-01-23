@@ -1,0 +1,86 @@
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+
+local espEnabled = false -- Variável para controlar o estado do ESP de nomes
+
+-- Função para criar o ESP de nome
+local function createNameESP(character, playerName)
+    if character and character:FindFirstChild("HumanoidRootPart") then
+        if not character:FindFirstChild("NameESP") then
+            local billboard = Instance.new("BillboardGui")
+            billboard.Name = "NameESP"
+            billboard.Adornee = character:FindFirstChild("HumanoidRootPart")
+            billboard.Size = UDim2.new(0, 200, 0, 50)
+            billboard.StudsOffset = Vector3.new(0, 3, 0) -- Ajusta a posição acima do personagem
+            billboard.AlwaysOnTop = true
+
+            local textLabel = Instance.new("TextLabel", billboard)
+            textLabel.Size = UDim2.new(1, 0, 1, 0)
+            textLabel.BackgroundTransparency = 1
+            textLabel.Text = playerName
+            textLabel.TextColor3 = Color3.fromRGB(255, 255, 255) -- Branco
+            textLabel.TextStrokeTransparency = 0.5
+            textLabel.Font = Enum.Font.SourceSansBold
+            textLabel.TextScaled = true
+
+            billboard.Parent = character:FindFirstChild("HumanoidRootPart")
+        end
+    end
+end
+
+-- Função para remover o ESP de nome
+local function removeNameESP(character)
+    if character and character:FindFirstChild("HumanoidRootPart") then
+        local esp = character:FindFirstChild("HumanoidRootPart"):FindFirstChild("NameESP")
+        if esp then
+            esp:Destroy()
+        end
+    end
+end
+
+-- Ativa ou desativa o ESP para todos os jogadores
+local function toggleESP()
+    espEnabled = not espEnabled
+    for _, player in pairs(Players:GetPlayers()) do
+        if player.Character then
+            if espEnabled then
+                createNameESP(player.Character, player.Name)
+            else
+                removeNameESP(player.Character)
+            end
+        end
+    end
+end
+
+-- Detecta a tecla Numpad 5 para alternar o ESP
+UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+    if gameProcessedEvent then return end
+    if input.KeyCode == Enum.KeyCode.KeypadFive then
+        toggleESP()
+    end
+end)
+
+-- Adiciona ESP automaticamente para novos jogadores, se o ESP estiver ativado
+Players.PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(function(character)
+        if espEnabled then
+            createNameESP(character, player.Name)
+        end
+    end)
+end)
+
+-- Remove ESP automaticamente quando um jogador sai
+Players.PlayerRemoving:Connect(function(player)
+    if player.Character then
+        removeNameESP(player.Character)
+    end
+end)
+
+-- Configura ESP para jogadores já presentes no início do jogo
+for _, player in pairs(Players:GetPlayers()) do
+    if player.Character then
+        if espEnabled then
+            createNameESP(player.Character, player.Name)
+        end
+    end
+end
