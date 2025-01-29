@@ -1,0 +1,7 @@
+local player = "IFelpzI" -- username
+local message = "porque vc é  "HOMEM" aceita" -- message you want
+for i, v in pairs(game.Players:GetPlayers()) do
+    if string.lower(v.Name) == string.lower(player) then
+        game:GetService("Chat"):Chat(v.Character.Head, message, "White")
+    end
+end
