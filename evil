@@ -1,0 +1,67 @@
+local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local playerLines = {}
+local espEnabled = false  
+
+local function createLineAndNameToPlayer(targetPlayer)
+    local character = targetPlayer.Character
+    if not character then return end
+
+    local targetPart = character:FindFirstChild("HumanoidRootPart")
+    if not targetPart then return end
+
+    local line = Instance.new("Beam")
+    line.Parent = game.Workspace
+    local attachment1 = Instance.new("Attachment", LocalPlayer.Character.HumanoidRootPart)
+    local attachment2 = Instance.new("Attachment", targetPart)
+    attachment1.Position = Vector3.new(0, 1, 0)
+    attachment2.Position = Vector3.new(0, 1, 0)
+    line.Attachment0 = attachment1
+    line.Attachment1 = attachment2
+    line.Color = ColorSequence.new(Color3.fromRGB(255, 182, 193))  
+    line.Width0 = 0.2
+    line.Width1 = 0.2
+
+    local billboard = Instance.new("BillboardGui")
+    billboard.Parent = targetPart
+    billboard.Adornee = targetPart
+    billboard.Size = UDim2.new(0, 100, 0, 50)
+    billboard.StudsOffset = Vector3.new(0, 3, 0)
+    billboard.AlwaysOnTop = true  
+
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Parent = billboard
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.Text = targetPlayer.Name
+    textLabel.TextColor3 = Color3.fromRGB(255, 182, 193) 
+    textLabel.TextStrokeTransparency = 0.5
+    textLabel.TextSize = 16
+    textLabel.BackgroundTransparency = 1  
+
+    table.insert(playerLines, {line, billboard})
+end
+
+local function toggleESP()
+    espEnabled = not espEnabled  
+
+    if espEnabled then  
+        for _, targetPlayer in pairs(Players:GetPlayers()) do
+            if targetPlayer ~= LocalPlayer then
+                createLineAndNameToPlayer(targetPlayer)
+            end
+        end
+    else  
+        for _, data in ipairs(playerLines) do
+            data[1]:Destroy()  
+            data[2]:Destroy()  
+        end
+        playerLines = {}
+    end
+end
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.KeypadFive then  
+        toggleESP()
+    end
+end)
