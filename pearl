@@ -1,0 +1,72 @@
+local HeadSize = 22.5  
+local Disabled = true  
+
+local originalStates = {}
+
+local function alterarHitbox(player, size, transparency, color, material, canCollide)
+    pcall(function()
+        local humanoidRootPart = player.Character:FindFirstChild("HumanoidRootPart")
+        if humanoidRootPart then
+            humanoidRootPart.Size = size
+            humanoidRootPart.Transparency = transparency
+            humanoidRootPart.Color = Color3.fromRGB(204, 0, 204)
+            humanoidRootPart.Material = material
+            humanoidRootPart.CanCollide = canCollide
+        end
+    end)
+end
+
+local function armazenarEstadoOriginal(player)
+    pcall(function()
+        local humanoidRootPart = player.Character:FindFirstChild("HumanoidRootPart")
+        if humanoidRootPart then
+            originalStates[player] = {
+                size = humanoidRootPart.Size,
+                transparency = humanoidRootPart.Transparency,
+                color = humanoidRootPart.Color,
+                material = humanoidRootPart.Material,
+                canCollide = humanoidRootPart.CanCollide
+            }
+        end
+    end)
+end
+
+local function restaurarEstadoOriginal(player)
+    pcall(function()
+        local humanoidRootPart = player.Character:FindFirstChild("HumanoidRootPart")
+        if humanoidRootPart and originalStates[player] then
+            humanoidRootPart.Size = originalStates[player].size
+            humanoidRootPart.Transparency = originalStates[player].transparency
+            humanoidRootPart.Color = originalStates[player].color
+            humanoidRootPart.Material = originalStates[player].material
+            humanoidRootPart.CanCollide = originalStates[player].canCollide
+        end
+    end)
+end
+
+local function alternarEstado()
+    Disabled = not Disabled  
+    if Disabled then
+        for _, player in pairs(game:GetService('Players'):GetPlayers()) do
+            if player.Character then
+                restaurarEstadoOriginal(player)
+            end
+        end
+    else
+        for _, player in pairs(game:GetService('Players'):GetPlayers()) do
+            if player.Name ~= game:GetService('Players').LocalPlayer.Name and player.Character then
+                armazenarEstadoOriginal(player)  
+                alterarHitbox(player, Vector3.new(HeadSize, HeadSize, HeadSize), 0.7, "Really black", "Neon", false)
+            end
+        end
+    end
+end
+
+game:GetService('UserInputService').InputBegan:Connect(function(input, gameProcessedEvent)
+    if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == Enum.KeyCode.LeftAlt and not gameProcessedEvent then
+        alternarEstado()
+    end
+end)
+
+game:GetService('RunService').RenderStepped:Connect(function()
+end)
