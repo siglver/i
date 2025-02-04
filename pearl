@@ -9,7 +9,7 @@ local function alterarHitbox(player, size, transparency, color, material, canCol
         if humanoidRootPart then
             humanoidRootPart.Size = size
             humanoidRootPart.Transparency = transparency
-            humanoidRootPart.Color = Color3.fromRGB(204, 0, 204)
+            humanoidRootPart.Color = Color3.fromRGB(255, 175, 255) -- Roxo claro
             humanoidRootPart.Material = material
             humanoidRootPart.CanCollide = canCollide
         end
